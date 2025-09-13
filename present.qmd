@@ -1,0 +1,47 @@
+---
+title: "Obesidade pelos dados do VIGITEL 2023"
+subtitle: "MAT02268 - Bioestatística A"
+format:
+  revealjs:
+    slide-number: true
+    chalkboard:
+      buttons: false
+    preview-links: auto
+    logo: images/ufrgs.png
+    css: style/styles.css
+    footer: 'Davi Augusto, Eduardo Garcez e João Arend'
+---
+
+```{r opt, include = FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+```{r lib}
+
+libs <- c(
+  "dplyr", "ggplot2", "purrr",
+  "stringr", "survey", "broom",
+  "gt", "readr", "table1"
+)
+
+for (lib in libs) {
+  if (!requireNamespace(lib, quietly = TRUE)) {
+      install.packages(lib)
+    }
+  library(lib, character.only = TRUE)
+}
+```
+
+```{r data}
+
+Vigitel <- read.csv2("data/Vigitel-2023-peso-rake.csv", sep = ",")
+# View(Vigitel)
+```
+
+## VIGITEL
+
+**- Sistema de Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico -**
+
+> **Objetivo:**
+>
+> > Monitorar anualmente a situação de saúde da população brasileira, por meio da distribuição dos principais fatores de risco e proteção para as DCNT's.
