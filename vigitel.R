@@ -7,7 +7,7 @@ library(broom)
 library(gt)
 library(readr)
 library(table1)
-Vigitel <- read.csv2("Vigitel-2023-peso-rake.csv", sep = ",")
+Vigitel <- read.csv2("data/Vigitel-2023-peso-rake.csv", sep = ",")
 View(Vigitel)
 
 Vigitel_mut <- Vigitel %>%
