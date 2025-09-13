@@ -7,7 +7,7 @@ library(broom)
 library(gt)
 library(readr)
 library(table1)
-Vigitel <- read_csv("Vigitel-2023-peso-rake.csv")
+Vigitel <- read.csv2("Vigitel-2023-peso-rake.csv", sep = ",")
 View(Vigitel)
 
 Vigitel_mut <- Vigitel %>%
@@ -195,7 +195,29 @@ gt_tab <- tab_final %>%
 
 gt_tab
 
+# ============================================================
+# Modelo com peso rake (incorpora correção para sobredispersão)
+# ============================================================
+# Uso do quasipoisson é essencial porque:
+# 1) Permite sobredispersão (variância > média) comum em surveys
+# 2) Ajusta erros padrão automaticamente para desenho amostral complexo
+# 3) Resulta em IC95% mais realistas
 
-#pesorake --> usando regressão de poisson tem que usar o exemplo dela
+m_peso_rake <- svyglm(I(ob=="Sim") ~ upf_cat,
+                      design=vigi_svy,
+                      subset = !is.na(ob) & !is.na(upf_cat),
+                      family=quasipoisson)
 
-#fazer intervalo de confiança pra razão
+# Sumário do modelo (incluindo dispersão estimada)
+summary(m_peso_rake)
+
+# Razões de prevalência (RP)
+cat("\n=== RAZÕES DE PREVALÊNCIA ===\n")
+rp_estimates <- exp(m_peso_rake$coefficients)
+print(rp_estimates)
+
+# Intervalos de confiança 95% para as RP
+cat("\n=== IC95% PARA AS RAZÕES DE PREVALÊNCIA ===\n")
+ic_rp <- exp(confint(m_peso_rake))
+print(ic_rp)
+# ============================================================
