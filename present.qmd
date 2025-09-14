@@ -1,5 +1,5 @@
 ---
-title: "Ultraprocessados e obesidade"
+title: "Ultraprocessados e Obesidade 🌭🍟"
 subtitle: "MAT02268 - Bioestatística A"
 format:
   revealjs:
@@ -12,7 +12,339 @@ format:
     footer: 'Davi Augusto, Eduardo Garcez e João Arend'
 ---
 
+
+```{r opt, include = FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+```{r lib}
+
+libs <- c(
+  "dplyr", "ggplot2", "purrr",
+  "stringr", "survey", "broom",
+  "gt", "readr", "table1"
+)
+
+for (lib in libs) {
+  if (!requireNamespace(lib, quietly = TRUE)) {
+      install.packages(lib)
+    }
+  library(lib, character.only = TRUE)
+}
+```
+
+
+```{r, base, echo = FALSE, include = FALSE}
+library(purrr)
+library(stringr)
+library(survey)
+library(dplyr)
+library(broom)
+library(readr)
+library(table1)
+#remove.packages("rlang")
+#install.packages("rlang", dependencies = TRUE)
+library(rlang)
+library(readr)
+
+library(knitr)
+
+# ============================================================
+# 1) Importar e preparar os dados
+# ============================================================
+Vigitel <- read_csv("data/Vigitel-2023-peso-rake.csv")
+
+Vigitel_mut <- Vigitel %>%
+  mutate(
+    # Confundidores
+    idade_cat = factor(cut(q6, breaks = c(18, 35, 60, Inf), right = FALSE,
+                           labels = c("18-34","35-59","60+"))),
+    sexo = factor(q7, labels = c("Homem", "Mulher")),
+    esc_cat   = factor(fesc),
+    atividade_fisica = factor(q42, labels = c("Sim", "Não")),  # variável nova
+    
+    # Exposição: ultraprocessados
+    upf_cat = factor(score_upp_2cat, labels = c("Não", "Sim")),
+    
+    # Desfecho: obesidade
+    ob = factor(obesid, labels = c("Não", "Sim")),
+    
+    pesorake = as.numeric(pesorake)
+  )
+
+# ============================================================
+# 2) Desenho amostral
+# ============================================================
+vigi_svy <- svydesign(
+  id      = ~1,
+  weights = ~pesorake,
+  data    = Vigitel_mut
+)
+
+#proporcao de obesidade
+
+#prevalência global de obesidade
+svyciprop(~I(ob=="Sim"), vigi_svy)
+#aproximadamente 24% dos adultos são obesos (IC95% 22,7–25,3%)
+
+#prevalência de obesidade por grupo de consumo de ultraprocessados
+svyby(~I(ob=="Sim"),~upf_cat,design=vigi_svy, svyciprop,vartype="ci")
+#obesidade em quem NÃO consome UPF: ~24,5% (IC95% 23,0–26,0%)
+#obesidade em quem consome UPF: ~21,7% (IC95% 19,0–24,6%)
+#obesidade ligeiramente MENOR entre consumidores de UPF (resultado bruto, ainda sem ajuste)
+
+#prevalência de obesidade por grupo de idade
+svyby(~I(ob=="Sim"),~idade_cat,design=vigi_svy, svyciprop,vartype="ci")
+#18–34 anos: 19,9% (IC95% 17,7–22,3%)
+#35–59 anos: 27,8% (IC95% 25,9–29,8%)
+#60+ anos: 23,4% (IC95% 21,1–25,9%)
+#obesidade é MAIS comum em 35–59 anos, intermediária em 60+ e MENOR em 18–34 anos
+
+#prevalência de consumo de ultraprocessados por grupo de idade
+svyby(~I(upf_cat=="Sim"), ~idade_cat, design=vigi_svy, svyciprop, vartype="ci")
+#18–34 anos: 24,3% consomem UPF (IC95% 22,1–26,7%)
+#35–59 anos: 15,7% (IC95% 14,1–17,4%)
+#60+ anos: 9,4% (IC95% 7,9–11,1%)
+#consumo de UPF é MAIS comum em jovens e cai bastante com a idade
+
+#IMPORTANTE: tabela de contingência
+tabela1_age <- table1(~ factor(Vigitel_mut$idade_cat) | Vigitel_mut$upf_cat, data = Vigitel_mut)
+print(tabela1_age)
+
+# ============================================================
+# Remover missings - exposição, desfecho ou confundidores
+# ============================================================
+vigi_svy2 <- subset(vigi_svy, !is.na(ob) & !is.na(upf_cat))
+
+# Prevalência de obesidade por consumo de UPF
+svyby(~I(ob=="Sim"), ~upf_cat, design=vigi_svy2, svyciprop, vartype="ci")
+
+# Prevalência de obesidade por idade
+svyby(~I(ob=="Sim"), ~idade_cat, design=vigi_svy2, svyciprop, vartype="ci")
+
+# Prevalência de UPF por idade
+svyby(~I(upf_cat=="Sim"), ~idade_cat, design=vigi_svy2, svyciprop, vartype="ci")
+
+# ============================================================
+# 3) Modelos
+# ============================================================
+
+# --- Modelo bruto
+mbruto <- svyglm(I(ob=="Sim") ~ upf_cat,
+                 design=vigi_svy,
+                 subset = !is.na(ob) & !is.na(upf_cat),
+                 family=quasipoisson)
+
+# --- Ajustado por idade
+m1 <- svyglm(I(ob=="Sim") ~ upf_cat + idade_cat,
+             design=vigi_svy,
+             subset = !is.na(ob) & !is.na(upf_cat),
+             family=quasipoisson)
+
+# --- Ajustado por sexo
+m2 <- svyglm(I(ob=="Sim") ~ upf_cat + sexo,
+             design=vigi_svy,
+             subset = !is.na(ob) & !is.na(upf_cat),
+             family=quasipoisson)
+
+# --- Ajustado por escolaridade
+m3 <- svyglm(I(ob=="Sim") ~ upf_cat + esc_cat,
+             design=vigi_svy,
+             subset = !is.na(ob) & !is.na(upf_cat),
+             family=quasipoisson)
+
+# --- Ajustado por atividade física
+m4 <- svyglm(I(ob=="Sim") ~ upf_cat + atividade_fisica,
+             design=vigi_svy,
+             subset = !is.na(ob) & !is.na(upf_cat) & !is.na(atividade_fisica),
+             family=quasipoisson)
+
+# --- Ajustado por idade + escolaridade + atividade física
+m5 <- svyglm(I(ob=="Sim") ~ upf_cat + idade_cat + esc_cat + atividade_fisica,
+             design=vigi_svy,
+             subset = !is.na(ob) & !is.na(upf_cat) & !is.na(atividade_fisica),
+             family=quasipoisson)
+
+# ============================================================
+# 4) Tabela final com RP, IC95% e p-valor
+# ============================================================
+tab_final <- bind_rows(
+  tidy(mbruto, conf.int=TRUE, exponentiate=TRUE) %>%
+    filter(term=="upf_catSim") %>% mutate(Modelo="Bruta"),
+  tidy(m1, conf.int=TRUE, exponentiate=TRUE) %>%
+    filter(term=="upf_catSim") %>% mutate(Modelo="Ajustada por Idade"),
+  tidy(m2, conf.int=TRUE, exponentiate=TRUE) %>%
+    filter(term=="upf_catSim") %>% mutate(Modelo="Ajustada por Sexo"),
+  tidy(m3, conf.int=TRUE, exponentiate=TRUE) %>%
+    filter(term=="upf_catSim") %>% mutate(Modelo="Ajustada por Escolaridade"),
+  tidy(m4, conf.int=TRUE, exponentiate=TRUE) %>%
+    filter(term=="upf_catSim") %>% mutate(Modelo="Ajustada por Atividade Física"),
+  tidy(m5, conf.int=TRUE, exponentiate=TRUE) %>%
+    filter(term=="upf_catSim") %>% mutate(Modelo="Ajustada por Idade + Escolaridade + Atividade Física")
+) %>%
+  transmute(
+    Modelo,
+    `RP` = estimate,
+    `IC95% (inferior)` = conf.low,
+    `IC95% (superior)` = conf.high,
+    `p-valor` = p.value
+  )
+
+# Renderizar tabela
+gt_tab <- tab_final %>%
+  mutate(
+    RP = sprintf("%.2f", RP),
+    `IC95% (inferior)` = sprintf("%.2f", `IC95% (inferior)`),
+    `IC95% (superior)` = sprintf("%.2f", `IC95% (superior)`),
+    `p-valor` = ifelse(`p-valor`<0.001, "<0,001",
+                       sub("\\.", ",", sprintf("%.3f", `p-valor`)))
+  ) %>%
+  gt::gt() %>%
+  gt::tab_header(title="Razões de Prevalência (RP) – Obesidade vs Consumo de Ultraprocessados")
+
+
+# ============================================================
+# 5) DESFECHOS SECUNDÁRIOS: Hipertensão e Diabetes
+# ============================================================
+
+# Recodificar variáveis (1=Sim, 2=Não) e descartar 777 ("não sei")
+Vigitel_mut <- Vigitel_mut %>%
+  mutate(
+    hipertensao = case_when(
+      q75 %in% c(1,2) ~ factor(q75, levels=c(2,1), labels=c("Não","Sim")),
+      TRUE ~ NA
+    ),
+    diabetes = case_when(
+      q76 %in% c(1,2) ~ factor(q76, levels=c(2,1), labels=c("Não","Sim")),
+      TRUE ~ NA
+    )
+  )
+
+# Atualizar desenho com as novas variáveis
+vigi_svy <- svydesign(
+  id      = ~1,
+  weights = ~pesorake,
+  data    = Vigitel_mut
+)
+
+# ------------------------------------------------------------
+# Função auxiliar para rodar análises por desfecho
+# ------------------------------------------------------------
+analise_desfecho <- function(desfecho, label){
+  m_bruto <- svyglm(as.formula(paste0("I(", desfecho, "=='Sim') ~ upf_cat")),
+                    design=vigi_svy,
+                    subset = !is.na(get(desfecho)),
+                    family=quasipoisson)
+  
+  m_ajust <- svyglm(as.formula(paste0("I(", desfecho, "=='Sim') ~ upf_cat + idade_cat + sexo + esc_cat + atividade_fisica")),
+                    design=vigi_svy,
+                    subset = !is.na(get(desfecho)),
+                    family=quasipoisson)
+  
+  res <- bind_rows(
+    tidy(m_bruto, conf.int=TRUE, exponentiate=TRUE) %>%
+      filter(term=="upf_catSim") %>% mutate(Modelo="Bruto", Desfecho=label),
+    tidy(m_ajust, conf.int=TRUE, exponentiate=TRUE) %>%
+      filter(term=="upf_catSim") %>% mutate(Modelo="Ajustado", Desfecho=label)
+  ) %>%
+    transmute(
+      Desfecho,
+      Modelo,
+      `RP` = estimate,
+      `IC95% (inferior)` = conf.low,
+      `IC95% (superior)` = conf.high,
+      `p-valor` = p.value
+    )
+  return(res)
+}
+
+# ------------------------------------------------------------
+# Rodar para cada desfecho secundário
+# ------------------------------------------------------------
+res_obes   <- analise_desfecho("ob", "Obesidade")
+res_hipert <- analise_desfecho("hipertensao", "Hipertensão")
+res_diab   <- analise_desfecho("diabetes", "Diabetes")
+
+# Juntar resultados
+tab_secundarios <- bind_rows(res_obes,res_hipert, res_diab)
+
+# Renderizar tabela
+gt_tab2 <- tab_secundarios %>%
+  mutate(
+    RP = sprintf("%.2f", RP),
+    `IC95% (inferior)` = sprintf("%.2f", `IC95% (inferior)`),
+    `IC95% (superior)` = sprintf("%.2f", `IC95% (superior)`),
+    `p-valor` = ifelse(`p-valor`<0.001, "<0,001",
+                       sub("\\.", ",", sprintf("%.3f", `p-valor`)))
+  ) %>%
+  gt::gt() %>%
+  gt::tab_header(title="Razões de Prevalência (RP) – Consumo de Ultraprocessados e Doenças Crônicas")
+
+# ============================================================
+# 6) Comparar com Modelos Logísticos (OR)
+# ============================================================
+
+# ------------------------------------------------------------
+# Função auxiliar para rodar análises logísticas
+# ------------------------------------------------------------
+analise_logit <- function(desfecho, label){
+  m_bruto <- svyglm(as.formula(paste0("I(", desfecho, "=='Sim') ~ upf_cat")),
+                    design=vigi_svy,
+                    subset = !is.na(get(desfecho)),
+                    family=binomial(link="logit"))
+  
+  m_ajust <- svyglm(as.formula(paste0("I(", desfecho, "=='Sim') ~ upf_cat + idade_cat + sexo + esc_cat + atividade_fisica")),
+                    design=vigi_svy,
+                    subset = !is.na(get(desfecho)),
+                    family=binomial(link="logit"))
+  
+  res <- bind_rows(
+    tidy(m_bruto, conf.int=TRUE, exponentiate=TRUE) %>%
+      filter(term=="upf_catSim") %>% mutate(Modelo="Bruto", Desfecho=label),
+    tidy(m_ajust, conf.int=TRUE, exponentiate=TRUE) %>%
+      filter(term=="upf_catSim") %>% mutate(Modelo="Ajustado", Desfecho=label)
+  ) %>%
+    transmute(
+      Desfecho,
+      Modelo,
+      `OR` = estimate,
+      `IC95% (inferior)` = conf.low,
+      `IC95% (superior)` = conf.high,
+      `p-valor` = p.value
+    )
+  return(res)
+}
+
+# ------------------------------------------------------------
+# Rodar para obesidade, hipertensão e diabetes
+# ------------------------------------------------------------
+res_logit_ob   <- analise_logit("ob", "Obesidade")
+res_logit_hip  <- analise_logit("hipertensao", "Hipertensão")
+res_logit_diab <- analise_logit("diabetes", "Diabetes")
+
+# Juntar resultados
+tab_logit <- bind_rows(res_logit_ob, res_logit_hip, res_logit_diab)
+
+# ------------------------------------------------------------
+# Renderizar tabela de ORs
+# ------------------------------------------------------------
+gt_tab_logit <- tab_logit %>%
+  mutate(
+    OR = sprintf("%.2f", OR),
+    `IC95% (inferior)` = sprintf("%.2f", `IC95% (inferior)`),
+    `IC95% (superior)` = sprintf("%.2f", `IC95% (superior)`),
+    `p-valor` = ifelse(`p-valor`<0.001, "<0,001",
+                       sub("\\.", ",", sprintf("%.3f", `p-valor`)))
+  ) %>%
+  gt::gt() %>%
+  gt::tab_header(title="Razões de Chances (OR) – Consumo de Ultraprocessados e Doenças Crônicas")
+
+
+```
+
+
 ## VIGITEL
+
 
 **- Sistema de Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico -**
 
@@ -48,7 +380,7 @@ format:
 ::: footer
 :::
 
-![](images/agbrasil.png){.absolute .fragment .fade-in-then-out top="80" left="0"}
+![](images/agbrasil.png){.absolute   top="80" left="0"}
 
 ![](images/veja.png){.absolute .fragment .fade-in-then-out top="80" left="0"}
 
@@ -69,49 +401,169 @@ Referencias;
 - https://www.unicef.org/brazil/comunicados-de-imprensa/pela-primeira-vez-obesidade-supera-desnutricao-globalmente-entre-criancas-e-adolescentes-em-idade-escolar
 -->
 
+
+## Possíveis confundimentos/viéses
+
+- Idade
+- Sexo
+- Escolaridade
+- Atividade Física
+- Renda * 
+
+
 # Variáveis
 
 ## Exposição:
 
-  - Consumo de ultraprocessados (definir corte — ex.: ≥5 vezes por semana = exposição).
-  - Variáveis candidatas no Vigitel: consumo de refrigerante, embutidos, biscoitos recheados, fast food (dependendo do que o banco traz em 2023).
-  - Pode-se criar um **índice de ultraprocessados** combinando itens.
-
+  - Consumo de 5 ou mais grupos de alimentos ultraprocessados.
+  - Variáveis Relacionadas: consumo de refrigerante, embutidos, biscoitos recheados, fast food...
+  - ![](images/grupos.png){.absolute}
 
 ## Desfechos:
 
-  - **Obesidade**: IMC ≥ 30 (calculado de peso/altura).
+  - **Obesidade**: IMC ≥ 30 
+
+$$
+IMC = \frac{peso(kg)}{altura(m)^2}
+$$
 
 ## Confundidores candidatos:
 
-  - Sociodemográficos: **idade**, **sexo**, **escolaridade**, **renda**, **região/capital**.
-  - Comportamentais: **atividade física**, **tabagismo**, **consumo de álcool**.
-  - Atenção: **IMC** pode ser **mediador** no caminho ultraprocessados → hipertensão. Então:
-    - Se objetivo = **efeito total**, **não ajustar por IMC** no modelo de hipertensão.
-    - Se objetivo = **efeito direto independente do peso**, aí sim ajusta por IMC (e discute).
+  - Sociodemográficos: **idade**, **sexo**, **escolaridade**
+  - Comportamentais: **atividade física**
 
-```{r opt, include = FALSE}
-knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+## Análise de prevalência global{.smaller}
+
+::: {.panel-tabset}
+
+### Obesidade 
+```{r, analise-prevalencia-global}
+#| echo: TRUE
+
+#prevalência global de obesidade
+
+svyciprop(~I(ob=="Sim"), vigi_svy)
+#aproximadamente 24% dos adultos são obesos (IC95% 22,7–25,3%)
 ```
 
-```{r lib}
+### UPF
+```{r}
+#| echo: TRUE
 
-libs <- c(
-  "dplyr", "ggplot2", "purrr",
-  "stringr", "survey", "broom",
-  "gt", "readr", "table1"
-)
-
-for (lib in libs) {
-  if (!requireNamespace(lib, quietly = TRUE)) {
-      install.packages(lib)
-    }
-  library(lib, character.only = TRUE)
-}
+#prevalência de obesidade por grupo de consumo de ultraprocessados
+svyby(~I(ob=="Sim"),~upf_cat,design=vigi_svy, svyciprop,vartype="ci")
+#obesidade em quem NÃO consome UPF: ~24,5% (IC95% 23,0–26,0%)
+#obesidade em quem consome UPF: ~21,7% (IC95% 19,0–24,6%)
+#obesidade ligeiramente MENOR entre consumidores de UPF (resultado bruto, ainda sem ajuste)
 ```
 
-```{r data}
+### Obesidade(Grupo)
+```{r}
+#| echo: TRUE
 
-Vigitel <- read.csv2("data/Vigitel-2023-peso-rake.csv", sep = ",")
-# View(Vigitel)
+#prevalência de obesidade por grupo de idade
+svyby(~I(ob=="Sim"),~idade_cat,design=vigi_svy, svyciprop,vartype="ci")
+#18–34 anos: 19,9% (IC95% 17,7–22,3%)
+#35–59 anos: 27,8% (IC95% 25,9–29,8%)
+#60+ anos: 23,4% (IC95% 21,1–25,9%)
+#obesidade é MAIS comum em 35–59 anos, intermediária em 60+ e MENOR em 18–34 anos
 ```
+
+### UPF(Grupo)
+```{r}
+#| echo: TRUE
+
+#prevalência de consumo de ultraprocessados por grupo de idade
+svyby(~I(upf_cat=="Sim"), ~idade_cat, design=vigi_svy, svyciprop, vartype="ci")
+#18–34 anos: 24,3% consomem UPF (IC95% 22,1–26,7%)
+#35–59 anos: 15,7% (IC95% 14,1–17,4%)
+#60+ anos: 9,4% (IC95% 7,9–11,1%)
+#consumo de UPF é MAIS comum em jovens e cai bastante com a idade
+
+```
+
+:::
+
+## Modelo Estatístico{.smaller}
+
+:::footer 
+:::
+
+🔹 Por que usamos modelos de regressão neste estudo?
+
+🔹 Para estimar a Razão de Prevalência utilizamos a **Regressão de Poisson** com variânca robusta.
+
+🔹 **RP** é a medida de associação recomendada para estudos transversais com desfechos não raros (obesidade). Usando **OR** superestimaríamos a magnitude de associação.
+
+🔹 Interpretação direta: "consumidores de UPF têm x% mais/menos prevalência de obesidade comparados aos não consumidores".
+
+
+## Modelo Estatístico
+
+![](images/modelo-1.png){.absolute   top="80" left="0" width="450"}
+
+![](images/modelo-2.png){.absolute   top="80" right="0" width="450"}
+
+
+## Resultados
+```{r resultados}
+gt_tab
+```
+
+## Resultados
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r resultados2}
+gt_tab2
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r resultados3}
+gt_tab_logit
+```
+
+:::
+
+:::: 
+
+## Conclusões{.smaller}
+
+1. Obesidade
+
+- Tanto os modelos de Razão de Prevalência (RP) quanto os de Razão de Chances (OR) não mostraram associação estatisticamente significativa entre consumo de ultraprocessados e obesidade, após ajustes por idade.
+  
+- As estimativas (RP ~0,88–0,92; OR ~0,85–0,87) sugerem uma tendência de menor obesidade entre consumidores de ultraprocessados, mas isso provavelmente reflete viés de confusão residual (por exemplo, maior consumo entre jovens, que têm menor obesidade).
+
+## Conclusões{.smaller}
+
+2. Hipertensão e Diabetes
+
+- Nos modelos brutos, consumidores de ultraprocessados apresentaram menor prevalência/chance de hipertensão e diabetes (RP e OR < 1, p < 0,001).
+
+- Contudo, após ajuste pelos confundidores, a associação desaparece (RP e OR próximas de 1, com IC95% abrangendo 1 e p > 0,1).
+
+- Isso indica que a diferença inicial era explicada pelo perfil sociodemográfico particularmente idade: **os jovens consomem mais ultraprocessados, mas ainda não desenvolveram tantas doenças crônicas** 
+
+## Conclusões{.smaller}
+
+3. Comparação OR vs RP
+
+- Os resultados de OR e RP foram consistentes em termos de direção do efeito: ambos sugerem ausência de associação após ajuste.
+
+- Porém, como esperado, os OR tenderam a superestimar a força da associação no modelo bruto (ex.: OR=0,61 para hipertensão vs RP=0,69).
+
+- Isso confirma que a escolha pelo modelo de RP (quasipoisson ou log-binomial) é mais adequada em estudos transversais de prevalência.
+
+## Fechamento{.smaller}
+
+- Não encontramos associação significativa entre consumo de ultraprocessados e obesidade, hipertensão ou diabetes na amostra após controle de confundidores.
+
+- Os achados brutos sugeriam um "efeito protetor" dos ultraprocessados. No entanto, esse achado é viesado pelo perfil etário dos consumidores (mais jovens, com menor risco imediato de doenças crônicas).
+
+- Esses resultados **não devem ser interpretados como ausência de risco** dos ultraprocessados. A literatura já mostra evidências sólidas de que ultraprocessados aumentam o risco de obesidade, síndrome metabólica, diabetes tipo 2 e doenças cardiovasculares, mas esses efeitos são **cumulativos e se manifestam ao longo do tempo.**
+
+- Assim, o nosso estudo ilustra uma limitação típica de estudos transversais: o viés da idade e a dificuldade de captar efeitos de longo prazo.
