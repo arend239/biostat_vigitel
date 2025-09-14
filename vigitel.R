@@ -42,6 +42,50 @@ vigi_svy <- svydesign(
   data    = Vigitel_mut
 )
 
+#proporcao de obesidade
+
+#prevalência global de obesidade
+svyciprop(~I(ob=="Sim"), vigi_svy)
+#aproximadamente 24% dos adultos são obesos (IC95% 22,7–25,3%)
+
+#prevalência de obesidade por grupo de consumo de ultraprocessados
+svyby(~I(ob=="Sim"),~upf_cat,design=vigi_svy, svyciprop,vartype="ci")
+#obesidade em quem NÃO consome UPF: ~24,5% (IC95% 23,0–26,0%)
+#obesidade em quem consome UPF: ~21,7% (IC95% 19,0–24,6%)
+#obesidade ligeiramente MENOR entre consumidores de UPF (resultado bruto, ainda sem ajuste)
+
+#prevalência de obesidade por grupo de idade
+svyby(~I(ob=="Sim"),~idade_cat,design=vigi_svy, svyciprop,vartype="ci")
+#18–34 anos: 19,9% (IC95% 17,7–22,3%)
+#35–59 anos: 27,8% (IC95% 25,9–29,8%)
+#60+ anos: 23,4% (IC95% 21,1–25,9%)
+#obesidade é MAIS comum em 35–59 anos, intermediária em 60+ e MENOR em 18–34 anos
+
+#prevalência de consumo de ultraprocessados por grupo de idade
+svyby(~I(upf_cat=="Sim"), ~idade_cat, design=vigi_svy, svyciprop, vartype="ci")
+#18–34 anos: 24,3% consomem UPF (IC95% 22,1–26,7%)
+#35–59 anos: 15,7% (IC95% 14,1–17,4%)
+#60+ anos: 9,4% (IC95% 7,9–11,1%)
+#consumo de UPF é MAIS comum em jovens e cai bastante com a idade
+
+#IMPORTANTE: tabela de contingência
+tabela1_age <- table1(~ factor(Vigitel_mut$idade_cat) | Vigitel_mut$upf_cat, data = Vigitel_mut)
+print(tabela1_age)
+
+# ============================================================
+# Remover missings - exposição, desfecho ou confundidores
+# ============================================================
+vigi_svy2 <- subset(vigi_svy, !is.na(ob) & !is.na(upf_cat))
+
+# Prevalência de obesidade por consumo de UPF
+svyby(~I(ob=="Sim"), ~upf_cat, design=vigi_svy2, svyciprop, vartype="ci")
+
+# Prevalência de obesidade por idade
+svyby(~I(ob=="Sim"), ~idade_cat, design=vigi_svy2, svyciprop, vartype="ci")
+
+# Prevalência de UPF por idade
+svyby(~I(upf_cat=="Sim"), ~idade_cat, design=vigi_svy2, svyciprop, vartype="ci")
+
 # ============================================================
 # 3) Modelos
 # ============================================================
@@ -259,6 +303,7 @@ gt_tab_logit <- tab_logit %>%
   gt::tab_header(title="Razões de Chances (OR) – Consumo de Ultraprocessados e Desfechos Crônicos")
 
 gt_tab_logit
+
 
 
 
