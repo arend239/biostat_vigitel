@@ -2,9 +2,11 @@
 
 1. Obesidade
 
-- Tanto os modelos de Razão de Prevalência (RP) quanto os de Razão de Chances (OR) não mostraram associação estatisticamente significativa entre consumo de ultraprocessados e obesidade, após ajustes por idade, sexo, escolaridade e atividade física.
-
+- Tanto os modelos de Razão de Prevalência (RP) quanto os de Razão de Chances (OR) não mostraram associação estatisticamente significativa entre consumo de ultraprocessados e obesidade, após ajustes por idade.
+  
 - As estimativas (RP ~0,88–0,92; OR ~0,85–0,87) sugerem uma tendência de menor obesidade entre consumidores de ultraprocessados, mas isso provavelmente reflete viés de confusão residual (por exemplo, maior consumo entre jovens, que têm menor obesidade).
+
+<!-- sexo, escolaridade e atividade física. --> 
 
 2. Hipertensão e Diabetes
 

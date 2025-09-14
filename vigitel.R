@@ -13,8 +13,8 @@ library(readr)
 # ============================================================
 # 1) Importar e preparar os dados
 # ============================================================
-Vigitel <- read_csv("Vigitel-2023-peso-rake.csv")
 
+Vigitel <- read_csv("data/Vigitel-2023-peso-rake.csv")
 Vigitel_mut <- Vigitel %>%
   mutate(
     # Confundidores
@@ -47,6 +47,7 @@ vigi_svy <- svydesign(
 #prevalência global de obesidade
 svyciprop(~I(ob=="Sim"), vigi_svy)
 #aproximadamente 24% dos adultos são obesos (IC95% 22,7–25,3%)
+
 
 #prevalência de obesidade por grupo de consumo de ultraprocessados
 svyby(~I(ob=="Sim"),~upf_cat,design=vigi_svy, svyciprop,vartype="ci")
@@ -91,11 +92,13 @@ svyby(~I(upf_cat=="Sim"), ~idade_cat, design=vigi_svy2, svyciprop, vartype="ci")
 # ============================================================
 
 # --- Modelo bruto
-mbruto <- svyglm(I(ob=="Sim") ~ upf_cat,
+mbruto <- svyglm(Iupf_cat(ob=="Sim") ~ ,
                  design=vigi_svy,
                  subset = !is.na(ob) & !is.na(upf_cat),
                  family=quasipoisson)
 
+
+# mbruto
 # --- Ajustado por idade
 m1 <- svyglm(I(ob=="Sim") ~ upf_cat + idade_cat,
              design=vigi_svy,
@@ -149,8 +152,15 @@ tab_final <- bind_rows(
     `IC95% (inferior)` = conf.low,
     `IC95% (superior)` = conf.high,
     `p-valor` = p.value
-  )
+  ) 
 
+
+gt::gt(tab_final)
+gt::tab_header(title="Resultados Finais")
+
+
+library(knitr)
+kable(tab_final)
 # Renderizar tabela
 gt_tab <- tab_final %>%
   mutate(
@@ -167,6 +177,7 @@ gt_tab
 
 # ============================================================
 # 5) DESFECHOS SECUNDÁRIOS: Hipertensão e Diabetes
+
 # ============================================================
 
 # Recodificar variáveis (1=Sim, 2=Não) e descartar 777 ("não sei")
@@ -303,8 +314,3 @@ gt_tab_logit <- tab_logit %>%
   gt::tab_header(title="Razões de Chances (OR) – Consumo de Ultraprocessados e Desfechos Crônicos")
 
 gt_tab_logit
-
-
-
-
-
