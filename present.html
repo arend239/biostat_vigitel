@@ -9,7 +9,7 @@
 <link href="present_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.6.42">
 
-  <title>Obesidade pelos dados do VIGITEL 2023</title>
+  <title>Ultraprocessados e obesidade</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -129,7 +129,7 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Obesidade pelos dados do VIGITEL 2023</h1>
+  <h1 class="title">Ultraprocessados e obesidade</h1>
   <p class="subtitle">MAT02268 - Bioestatística A</p>
 
 <div class="quarto-title-authors">
@@ -138,15 +138,87 @@
 </section>
 <section id="vigitel" class="slide level2">
 <h2>VIGITEL</h2>
-<p><strong><em>- Sistema de Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico -</em></strong></p>
+<p><strong>- Sistema de Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico -</strong></p>
 <blockquote>
 <p><strong>Objetivo:</strong></p>
 <blockquote>
 <p>Monitorar anualmente a situação de saúde da população brasileira, por meio da distribuição dos principais fatores de risco e proteção para as DCNT’s.</p>
 </blockquote>
 </blockquote>
+</section>
+<section id="definição-do-problema" class="slide level2">
+<h2>Definição do problema</h2>
+<ul>
+<li><p><strong>Hipótese principal:</strong> O consumo frequente de ultraprocessados está associado a maior prevalência de <strong>obesidade</strong> em adultos brasileiros.</p></li>
+<li><p><strong>Justificativa:</strong> Ultraprocessados são reconhecidos pela literatura como fator de risco para doenças crônicas (densidade energética, sódio, gorduras trans/saturadas, aditivos).</p></li>
+</ul>
+</section>
+<section id="conceito" class="slide level2 smaller">
+<h2>Conceito</h2>
+<div class="columns">
+<div class="column" style="width:40%;">
+<ul>
+<li><p>Os alimentos ultraprocessados são produtos industriais feitos com substâncias artificiais ou extraídas de alimentos. Têm como característica serem <strong>saborosos</strong>, <strong>práticos</strong> e de <strong>baixo custo</strong>.</p></li>
+<li><p>Geralmente pobres em nutrientes e ricos em calorias, açúcar, gordura e aditivos químicos.</p></li>
+</ul>
+</div><div class="column" style="width:60%;">
+<p><img data-src="images/ultraprocessados.png"></p>
+</div></div>
+</section>
+<section id="motivadores" class="slide level2">
+<h2>Motivadores</h2>
+<div class="footer">
+
+</div>
+<p><img data-src="images/agbrasil.png" class="absolute fragment fade-in-then-out" style="top: 80px; left: 0px; "></p>
+<p><img data-src="images/veja.png" class="absolute fragment fade-in-then-out" style="top: 80px; left: 0px; "></p>
+<p><img data-src="images/fiocruz.png" class="absolute fragment fade-in-then-out" style="top: 80px; left: 90px; "></p>
+<p><img data-src="images/unicef.png" class="absolute fragment" style=""></p>
+<!--
+
+Referencias;
+
+- https://agenciabrasil.ebc.com.br/saude/noticia/2020-11/consumo-de-alimentos-ultraprocessados-cresce-na-pandemia
+
+- https://veja.abril.com.br/coluna/balanco-social/obesidade-e-consumo-de-ultraprocessados-avancam-entre-os-mais-pobres/
+
+- https://www.ajpmonline.org/pb-assets/Health%20Advance/journals/amepre/Nilson-et-al-1667841500.pdf
+
+- https://www.unicef.org/brazil/comunicados-de-imprensa/pela-primeira-vez-obesidade-supera-desnutricao-globalmente-entre-criancas-e-adolescentes-em-idade-escolar
+-->
+</section>
+<section>
+<section id="variáveis" class="title-slide slide level1 center">
+<h1>Variáveis</h1>
 
 </section>
+<section id="exposição" class="slide level2">
+<h2>Exposição:</h2>
+<ul>
+<li>Consumo de ultraprocessados (definir corte — ex.: ≥5 vezes por semana = exposição).</li>
+<li>Variáveis candidatas no Vigitel: consumo de refrigerante, embutidos, biscoitos recheados, fast food (dependendo do que o banco traz em 2023).</li>
+<li>Pode-se criar um <strong>índice de ultraprocessados</strong> combinando itens.</li>
+</ul>
+</section>
+<section id="desfechos" class="slide level2">
+<h2>Desfechos:</h2>
+<ul>
+<li><strong>Obesidade</strong>: IMC ≥ 30 (calculado de peso/altura).</li>
+</ul>
+</section>
+<section id="confundidores-candidatos" class="slide level2">
+<h2>Confundidores candidatos:</h2>
+<ul>
+<li>Sociodemográficos: <strong>idade</strong>, <strong>sexo</strong>, <strong>escolaridade</strong>, <strong>renda</strong>, <strong>região/capital</strong>.</li>
+<li>Comportamentais: <strong>atividade física</strong>, <strong>tabagismo</strong>, <strong>consumo de álcool</strong>.</li>
+<li>Atenção: <strong>IMC</strong> pode ser <strong>mediador</strong> no caminho ultraprocessados → hipertensão. Então:
+<ul>
+<li>Se objetivo = <strong>efeito total</strong>, <strong>não ajustar por IMC</strong> no modelo de hipertensão.</li>
+<li>Se objetivo = <strong>efeito direto independente do peso</strong>, aí sim ajusta por IMC (e discute).</li>
+</ul></li>
+</ul>
+
+</section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <p><img src="images/ufrgs.png" class="slide-logo"></p>

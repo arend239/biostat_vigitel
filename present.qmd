@@ -1,5 +1,5 @@
 ---
-title: "Obesidade pelos dados do VIGITEL 2023"
+title: "Ultraprocessados e obesidade"
 subtitle: "MAT02268 - Bioestatística A"
 format:
   revealjs:
@@ -11,6 +11,84 @@ format:
     css: style/styles.css
     footer: 'Davi Augusto, Eduardo Garcez e João Arend'
 ---
+
+## VIGITEL
+
+**- Sistema de Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico -**
+
+> **Objetivo:**
+>
+> > Monitorar anualmente a situação de saúde da população brasileira, por meio da distribuição dos principais fatores de risco e proteção para as DCNT's.
+
+## Definição do problema
+
+- **Hipótese principal:** O consumo frequente de ultraprocessados está associado a maior prevalência de **obesidade** em adultos brasileiros.
+
+- **Justificativa:** Ultraprocessados são reconhecidos pela literatura como fator de risco para doenças crônicas (densidade energética, sódio, gorduras trans/saturadas, aditivos).
+
+## Conceito{.smaller}
+
+:::: {.columns}
+
+::: {.column width="40%"}
+
+- Os alimentos ultraprocessados são produtos industriais feitos com substâncias artificiais ou extraídas de alimentos. Têm como característica serem **saborosos**, **práticos** e de **baixo custo**.
+
+- Geralmente pobres em nutrientes e ricos em calorias, açúcar, gordura e aditivos químicos.
+
+:::
+
+::: {.column width="60%"}
+![](images/ultraprocessados.png){}
+:::
+
+::::
+
+## Motivadores
+::: footer
+:::
+
+![](images/agbrasil.png){.absolute .fragment .fade-in-then-out top="80" left="0"}
+
+![](images/veja.png){.absolute .fragment .fade-in-then-out top="80" left="0"}
+
+![](images/fiocruz.png){.absolute .fragment .fade-in-then-out top="80" left="90"}
+
+![](images/unicef.png){.absolute .fragment}
+
+<!--
+
+Referencias;
+
+- https://agenciabrasil.ebc.com.br/saude/noticia/2020-11/consumo-de-alimentos-ultraprocessados-cresce-na-pandemia
+
+- https://veja.abril.com.br/coluna/balanco-social/obesidade-e-consumo-de-ultraprocessados-avancam-entre-os-mais-pobres/
+
+- https://www.ajpmonline.org/pb-assets/Health%20Advance/journals/amepre/Nilson-et-al-1667841500.pdf
+
+- https://www.unicef.org/brazil/comunicados-de-imprensa/pela-primeira-vez-obesidade-supera-desnutricao-globalmente-entre-criancas-e-adolescentes-em-idade-escolar
+-->
+
+# Variáveis
+
+## Exposição:
+
+  - Consumo de ultraprocessados (definir corte — ex.: ≥5 vezes por semana = exposição).
+  - Variáveis candidatas no Vigitel: consumo de refrigerante, embutidos, biscoitos recheados, fast food (dependendo do que o banco traz em 2023).
+  - Pode-se criar um **índice de ultraprocessados** combinando itens.
+
+
+## Desfechos:
+
+  - **Obesidade**: IMC ≥ 30 (calculado de peso/altura).
+
+## Confundidores candidatos:
+
+  - Sociodemográficos: **idade**, **sexo**, **escolaridade**, **renda**, **região/capital**.
+  - Comportamentais: **atividade física**, **tabagismo**, **consumo de álcool**.
+  - Atenção: **IMC** pode ser **mediador** no caminho ultraprocessados → hipertensão. Então:
+    - Se objetivo = **efeito total**, **não ajustar por IMC** no modelo de hipertensão.
+    - Se objetivo = **efeito direto independente do peso**, aí sim ajusta por IMC (e discute).
 
 ```{r opt, include = FALSE}
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
@@ -37,11 +115,3 @@ for (lib in libs) {
 Vigitel <- read.csv2("data/Vigitel-2023-peso-rake.csv", sep = ",")
 # View(Vigitel)
 ```
-
-## VIGITEL
-
-**- Sistema de Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico -**
-
-> **Objetivo:**
->
-> > Monitorar anualmente a situação de saúde da população brasileira, por meio da distribuição dos principais fatores de risco e proteção para as DCNT's.
