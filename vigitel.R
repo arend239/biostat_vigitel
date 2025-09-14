@@ -13,8 +13,8 @@ library(readr)
 # ============================================================
 # 1) Importar e preparar os dados
 # ============================================================
-Vigitel <- read_csv("data/Vigitel-2023-peso-rake.csv")
 
+Vigitel <- read_csv("data/Vigitel-2023-peso-rake.csv")
 Vigitel_mut <- Vigitel %>%
   mutate(
     # Confundidores
@@ -97,8 +97,8 @@ mbruto <- svyglm(Iupf_cat(ob=="Sim") ~ ,
                  subset = !is.na(ob) & !is.na(upf_cat),
                  family=quasipoisson)
 
-# mbruto
 
+# mbruto
 # --- Ajustado por idade
 m1 <- svyglm(I(ob=="Sim") ~ upf_cat + idade_cat,
              design=vigi_svy,
@@ -158,9 +158,9 @@ tab_final <- bind_rows(
 gt::gt(tab_final)
 gt::tab_header(title="Resultados Finais")
 
+
 library(knitr)
 kable(tab_final)
-
 # Renderizar tabela
 gt_tab <- tab_final %>%
   mutate(
@@ -177,6 +177,7 @@ gt_tab
 
 # ============================================================
 # 5) DESFECHOS SECUNDÁRIOS: Hipertensão e Diabetes
+
 # ============================================================
 
 # Recodificar variáveis (1=Sim, 2=Não) e descartar 777 ("não sei")
@@ -313,7 +314,3 @@ gt_tab_logit <- tab_logit %>%
   gt::tab_header(title="Razões de Chances (OR) – Consumo de Ultraprocessados e Desfechos Crônicos")
 
 gt_tab_logit
-
-
-
-
