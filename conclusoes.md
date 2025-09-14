@@ -36,3 +36,18 @@ VALIDAÇÃO NO CÓDIGO:
 - Esses resultados não devem ser interpretados como ausência de risco dos ultraprocessados. Pelo contrário, a literatura já mostra evidências sólidas de que ultraprocessados aumentam o risco de obesidade, síndrome metabólica, diabetes tipo 2 e doenças cardiovasculares, mas esses efeitos são cumulativos e se manifestam ao longo do tempo.
 
 - Assim, o nosso estudo ilustra uma limitação típica de estudos transversais: o viés da idade e a dificuldade de captar efeitos de longo prazo.
+
+## Conclusões menos gerais, mas também importantes:
+
+1) trata-se de efeito de longo prazo ou difícil de capturar em estudo transversal, mas que a literatura já comprovou os riscos → justificando a ideia dos “inimigos invisíveis”
+
+2) o efeito que buscamos validar no início pode estar mascarado por múltiplos comportamentos interligados
+
+3) no Vigitel não encontramos associação estatisticamente significativa entre consumo de ultraprocessados e hipertensão/diabetes.
+
+Mas isso não invalida a literatura, que já mostra forte relação causal. O problema é que:
+
+O Vigitel é transversal (não capta risco futuro).
+
+Muitas doenças (ex.: síndrome metabólica, aterosclerose) são “inimigos invisíveis” e não se manifestam de imediato.
+
