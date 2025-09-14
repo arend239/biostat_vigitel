@@ -12,7 +12,12 @@
 
 - Contudo, após ajuste pelos confundidores, a associação desaparece (RP e OR próximas de 1, com IC95% abrangendo 1 e p > 0,1).
 
-- Isso indica que a diferença inicial era explicada pelo perfil sociodemográfico (particularmente idade: os jovens consomem mais ultraprocessados, mas ainda não desenvolveram tantas doenças crônicas).
+- Isso indica que a diferença inicial era explicada pelo perfil sociodemográfico (particularmente idade: os jovens consomem mais ultraprocessados, mas ainda não desenvolveram tantas doenças crônicas 
+VALIDAÇÃO NO CÓDIGO: 
+#18–34 anos: 24,3% consomem UPF (IC95% 22,1–26,7%)
+#35–59 anos: 15,7% (IC95% 14,1–17,4%)
+#60+ anos: 9,4% (IC95% 7,9–11,1%)
+#consumo de UPF é MAIS comum nos jovens e cai bastante com a idade).
 
 3. Comparação OR vs RP
 
