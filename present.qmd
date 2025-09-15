@@ -62,13 +62,13 @@ Vigitel_mut <- Vigitel %>%
     sexo = factor(q7, labels = c("Homem", "Mulher")),
     esc_cat   = factor(fesc),
     atividade_fisica = factor(q42, labels = c("Sim", "Não")),  # variável nova
-    
+
     # Exposição: ultraprocessados
     upf_cat = factor(score_upp_2cat, labels = c("Não", "Sim")),
-    
+
     # Desfecho: obesidade
     ob = factor(obesid, labels = c("Não", "Sim")),
-    
+
     pesorake = as.numeric(pesorake)
   )
 
@@ -235,12 +235,12 @@ analise_desfecho <- function(desfecho, label){
                     design=vigi_svy,
                     subset = !is.na(get(desfecho)),
                     family=quasipoisson)
-  
+
   m_ajust <- svyglm(as.formula(paste0("I(", desfecho, "=='Sim') ~ upf_cat + idade_cat + sexo + esc_cat + atividade_fisica")),
                     design=vigi_svy,
                     subset = !is.na(get(desfecho)),
                     family=quasipoisson)
-  
+
   res <- bind_rows(
     tidy(m_bruto, conf.int=TRUE, exponentiate=TRUE) %>%
       filter(term=="upf_catSim") %>% mutate(Modelo="Bruto", Desfecho=label),
@@ -292,12 +292,12 @@ analise_logit <- function(desfecho, label){
                     design=vigi_svy,
                     subset = !is.na(get(desfecho)),
                     family=binomial(link="logit"))
-  
+
   m_ajust <- svyglm(as.formula(paste0("I(", desfecho, "=='Sim') ~ upf_cat + idade_cat + sexo + esc_cat + atividade_fisica")),
                     design=vigi_svy,
                     subset = !is.na(get(desfecho)),
                     family=binomial(link="logit"))
-  
+
   res <- bind_rows(
     tidy(m_bruto, conf.int=TRUE, exponentiate=TRUE) %>%
       filter(term=="upf_catSim") %>% mutate(Modelo="Bruto", Desfecho=label),
@@ -380,7 +380,7 @@ gt_tab_logit <- tab_logit %>%
 ::: footer
 :::
 
-![](images/agbrasil.png){.absolute   top="80" left="0"}
+![](images/agbrasil.png){.absolute .fragment .fade-in-then-out top="80" left="0"}
 
 ![](images/veja.png){.absolute .fragment .fade-in-then-out top="80" left="0"}
 
@@ -401,27 +401,26 @@ Referencias;
 - https://www.unicef.org/brazil/comunicados-de-imprensa/pela-primeira-vez-obesidade-supera-desnutricao-globalmente-entre-criancas-e-adolescentes-em-idade-escolar
 -->
 
-
 ## Possíveis confundimentos/viéses
 
 - Idade
 - Sexo
 - Escolaridade
 - Atividade Física
-- Renda * 
-
+- <span style="color: #b0b0b0;">Renda</span>
+- <span style="color: #b0b0b0;">Predisposição Genética</span>
 
 # Variáveis
 
 ## Exposição:
 
-  - Consumo de 5 ou mais grupos de alimentos ultraprocessados.
-  - Variáveis Relacionadas: consumo de refrigerante, embutidos, biscoitos recheados, fast food...
-  - ![](images/grupos.png){.absolute}
+- Consumo de 5 ou mais grupos de alimentos ultraprocessados.
+- Variáveis Relacionadas: consumo de refrigerante, embutidos, biscoitos recheados, fast food...
+![](images/grupos.png){.absolute}
 
 ## Desfechos:
 
-  - **Obesidade**: IMC ≥ 30 
+- **Obesidade**: IMC ≥ 30
 
 $$
 IMC = \frac{peso(kg)}{altura(m)^2}
@@ -436,7 +435,7 @@ $$
 
 ::: {.panel-tabset}
 
-### Obesidade 
+### Obesidade
 ```{r, analise-prevalencia-global}
 #| echo: TRUE
 
@@ -486,24 +485,26 @@ svyby(~I(upf_cat=="Sim"), ~idade_cat, design=vigi_svy, svyciprop, vartype="ci")
 
 ## Modelo Estatístico{.smaller}
 
-:::footer 
+:::footer
 :::
 
 🔹 Por que usamos modelos de regressão neste estudo?
 
 🔹 Para estimar a Razão de Prevalência utilizamos a **Regressão de Poisson** com variânca robusta.
 
-🔹 **RP** é a medida de associação recomendada para estudos transversais com desfechos não raros (obesidade). Usando **OR** superestimaríamos a magnitude de associação.
+🔹 **Razão de Prevalência** é a medida de associação recomendada para estudos transversais com desfechos não raros (obesidade). Usando **_Odds Ratio_** superestimaríamos a magnitude de associação.
 
 🔹 Interpretação direta: "consumidores de UPF têm x% mais/menos prevalência de obesidade comparados aos não consumidores".
 
 
 ## Modelo Estatístico
 
-![](images/modelo-1.png){.absolute   top="80" left="0" width="450"}
+::: {style="display: flex; justify-content: space-around; align-items: center;"}
 
-![](images/modelo-2.png){.absolute   top="80" right="0" width="450"}
+![](images/modelo-1.png){.absolute   top="80" left="150" width="650"}
+![](images/modelo-2.png){.absolute .fragment top="150" left="200" width="850"}
 
+:::
 
 ## Resultados
 ```{r resultados}
@@ -528,14 +529,14 @@ gt_tab_logit
 
 :::
 
-:::: 
+::::
 
 ## Conclusões{.smaller}
 
 1. Obesidade
 
 - Tanto os modelos de Razão de Prevalência (RP) quanto os de Razão de Chances (OR) não mostraram associação estatisticamente significativa entre consumo de ultraprocessados e obesidade, após ajustes por idade.
-  
+
 - As estimativas (RP ~0,88–0,92; OR ~0,85–0,87) sugerem uma tendência de menor obesidade entre consumidores de ultraprocessados, mas isso provavelmente reflete viés de confusão residual (por exemplo, maior consumo entre jovens, que têm menor obesidade).
 
 ## Conclusões{.smaller}
@@ -546,7 +547,7 @@ gt_tab_logit
 
 - Contudo, após ajuste pelos confundidores, a associação desaparece (RP e OR próximas de 1, com IC95% abrangendo 1 e p > 0,1).
 
-- Isso indica que a diferença inicial era explicada pelo perfil sociodemográfico particularmente idade: **os jovens consomem mais ultraprocessados, mas ainda não desenvolveram tantas doenças crônicas** 
+- Isso indica que a diferença inicial era explicada pelo perfil sociodemográfico particularmente idade: **os jovens consomem mais ultraprocessados, mas ainda não desenvolveram tantas doenças crônicas**
 
 ## Conclusões{.smaller}
 
@@ -567,3 +568,5 @@ gt_tab_logit
 - Esses resultados **não devem ser interpretados como ausência de risco** dos ultraprocessados. A literatura já mostra evidências sólidas de que ultraprocessados aumentam o risco de obesidade, síndrome metabólica, diabetes tipo 2 e doenças cardiovasculares, mas esses efeitos são **cumulativos e se manifestam ao longo do tempo.**
 
 - Assim, o nosso estudo ilustra uma limitação típica de estudos transversais: o viés da idade e a dificuldade de captar efeitos de longo prazo.
+
+# Obrigado pela atenção!
