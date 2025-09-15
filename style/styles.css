@@ -7,3 +7,70 @@
 .border-thick {
   border-width: 3px;
 }
+
+.reveal .slides .past.fragment {
+  opacity: 0.9;
+  transition: opacity 0.4s ease-in-out;
+}
+
+/* styles.css */
+/* styles.css */
+
+/* 1. O contêiner que vai segurar a pilha de imagens */
+.image-stack {
+  position: relative; /* Essencial para o posicionamento das imagens dentro dele */
+  width: 750px;     /* Largura do contêiner */
+  height: 600px;    /* Altura do contêiner */
+  margin: auto;     /* Centraliza o contêiner no slide */
+}
+
+/* 2. Estilo base para TODAS as imagens na pilha */
+.image-stack img {
+  position: absolute; /* Coloca as imagens umas sobre as outras */
+  top: 0;
+  left: 0;
+  width: 80%; /* Faz a imagem ocupar 80% da largura do contêiner */
+
+  /* Efeitos visuais e de transição */
+  border: 3px solid white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  border-radius: 5px;
+
+  /* Transição suave para todas as propriedades */
+  transition: all 0.5s ease-in-out;
+
+  /* Por padrão, os fragmentos começam invisíveis */
+  opacity: 0;
+  transform: translateX(-20px); /* Começa um pouco para a esquerda */
+}
+
+/* 3. Estilo para o fragmento ATUALMENTE visível */
+.image-stack img.fragment.visible {
+  opacity: 1;
+  transform: translateX(0); /* Move para a posição final */
+}
+
+/* 4. Estilo para os fragmentos que JÁ PASSARAM (o seu pedido original) */
+.image-stack img.fragment.past {
+  opacity: 0.55; /* Deixa a imagem anterior semi-transparente */
+  filter: blur(1.5px); /* E adiciona um leve desfoque */
+}
+
+/* 5. A 'mágica' do empilhamento: move cada imagem um pouco */
+/* A segunda imagem da pilha (quando visível ou passada) */
+.image-stack img.fragment:nth-of-type(2).visible,
+.image-stack img.fragment:nth-of-type(2).past {
+  transform: translateX(40px) rotate(2deg);
+}
+
+/* A terceira imagem da pilha */
+.image-stack img.fragment:nth-of-type(3).visible,
+.image-stack img.fragment:nth-of-type(3).past {
+  transform: translateX(80px) rotate(-2.5deg);
+}
+
+/* A quarta imagem da pilha (se houver) */
+.image-stack img.fragment:nth-of-type(4).visible,
+.image-stack img.fragment:nth-of-type(4).past {
+  transform: translateX(120px) rotate(3deg);
+}
